@@ -1,39 +1,34 @@
-#include <iostream>
-#include <iomanip>
+#include "include/circumcenter.hpp"
 #include <cmath>
-using namespace std;
 
-long double dist_sq(long double a,long double b){
-    return a*a+b*b;
-}
+namespace geometry
+{
 
-int main(){
-    long double x1,y1,x2,y2,x3,y3;
-    
-    cin >> x1 >> y1
-        >> x2 >> y2
-        >> x3 >> y3;
-    
-    long double d1,d2,d3;
-    d1 = dist_sq(x1,y1);
-    d2 = dist_sq(x2,y2);
-    d3 = dist_sq(x3,y3);
-    
-    long double denominator = 
-    2*((x2-x3)*(y1-y2)-(x1-x2)*(y2-y3));
-    
-    if(fabsl(denominator)<1e-15L){
-        cout << "Points are collinear" << '\n';
-        return 0;
+    static inline long double squared_norm(const Point &p) noexcept
+    {
+        return p.x * p.x + p.y * p.y;
     }
-    //X,Yはそれぞれ外心のx,y座標
-    long double numerator_X =
-    -(d1*(y2-y3)+d2*(y3-y1)+d3*(y1-y2));
-    
-    long double numerator_Y =
-    d1*(x2-x3)+d2*(x3-x1)+d3*(x1-x2);
 
-    cout << fixed << setprecision(10)
-         << numerator_X/denominator << " " 
-         << numerator_Y/denominator << '\n';
+    std::optional<Point> circumcenter(const Point &a, const Point &b, const Point &c, long double eps) noexcept
+    {
+        const long double d1 = squared_norm(a);
+
+        const long double d2 = squared_norm(b);
+        
+        const long double d3 = squared_norm(c);
+
+        const long double denom = 2.0L * ((b.x - c.x) * (a.y - b.y) - (a.x - b.x) * (b.y - c.y));
+
+        if (std::abs(denom) < eps)
+        {
+            return std::nullopt;
+        }
+
+        const long double num_x = -(d1 * (b.y - c.y) + d2 * (c.y - a.y) + d3 * (a.y - b.y));
+
+        const long double num_y = (d1 * (b.x - c.x) + d2 * (c.x - a.x) + d3 * (a.x - b.x));
+
+        return Point{num_x / denom, num_y / denom};
+    }
+
 }
